@@ -1,76 +1,72 @@
 package org.elcer.accounts.services;
 
 
-import com.google.common.annotations.VisibleForTesting;
 import org.elcer.accounts.exceptions.NoAccountException;
 import org.elcer.accounts.model.Account;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Local;
-import javax.ejb.LocalBean;
 import javax.ejb.Stateful;
-import javax.ejb.Stateless;
-import javax.enterprise.context.ApplicationScoped;
-import javax.persistence.*;
-import javax.persistence.criteria.*;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
-import java.math.BigDecimal;
 import java.util.List;
 
 @Stateful
 @Local
+@SuppressWarnings("WeakerAccess")
 public class AccountRepository {
 
 
-    @PostConstruct
-    private void init() {
-        System.out.println(this);
-    }
-
     @PersistenceContext(unitName = "accounts")
-    private EntityManager entityManager;
+   private EntityManager entityManager;
 
-    @VisibleForTesting
+
     public Account createAccount(Account account) {
         entityManager.persist(account);
         return account;
     }
 
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
-    public List<Account> getAllAccounts() {
+    public List<Account> getAllAccounts(int page, int size) {
         var builder = entityManager.getCriteriaBuilder();
         var q = builder.createQuery(Account.class);
         var root = q.from(Account.class);
         q.select(root);
         var query = entityManager.createQuery(q);
+        query.setFirstResult(page * size);
+        query.setMaxResults(size);
         return query.getResultList();
 
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
-    public Account retrieveAccountByIdNewTran(long id) {
-        return retrieveAccountById(id);
-    }
 
     @Transactional(Transactional.TxType.MANDATORY)
     public Account retrieveAccountById(long id) {
-        var builder = entityManager.getCriteriaBuilder();
-        var q = builder.createQuery(Account.class);
-        var root = q.from(Account.class);
-        q.select(root).where(builder.equal(root.get("id"), id));
-        TypedQuery<Account> query = entityManager.createQuery(q);
-        try {
-            return query.getSingleResult();
-        } catch (NoResultException e) {
+        Account account = entityManager.find(Account.class, id);
+
+        if (account == null) {
             throw new NoAccountException(id);
         }
+        return account;
 
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
-    public void setBalance(Account account, BigDecimal amount) {
-        account.setBalance(amount);
+
+    public void deleteAccount(long id) {
+        var builder = entityManager.getCriteriaBuilder();
+        CriteriaDelete<Account> delete = builder.createCriteriaDelete(Account.class);
+        Root<Account> root = delete.from(Account.class);
+        delete.where(builder.equal(root.get("id"), id));
+        entityManager.createQuery(delete).executeUpdate();
     }
 
-
+    public List<Account> retrieveAccountsByName(String name, int page, int size) {
+        return CriteriaUtils.createQuery(entityManager, Account.class,
+                (builder, root) -> builder.equal(root.get("name"), name))
+                .setFirstResult(page * size)
+                .setMaxResults(size)
+                .getResultList();
+    }
 }

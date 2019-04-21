@@ -9,9 +9,9 @@
     <name>bank rest service ejb</name>
 
     <properties>
+        <java.version>11</java.version>
         <jetty.version>9.4.15.v20190215</jetty.version>
-        <jersey.version>2.27</jersey.version>
-        <jackson.version>2.9.6</jackson.version>
+        <jackson.version>2.9.8</jackson.version>
         <slf4j.version>1.8.0-beta4</slf4j.version>
         <logback.version>1.3.0-alpha4</logback.version>
         <apache.httpclient.version>4.5.7</apache.httpclient.version>
@@ -28,50 +28,49 @@
         <tomee>8.0.0-M2</tomee>
     </properties>
 
-        <dependencyManagement>
-            <dependencies>
-<!--                <dependency>-->
-<!--                    <groupId>org.apache.xbean</groupId>-->
-<!--                    <artifactId>xbean-asm6-shaded</artifactId>-->
-<!--                    <version>4.8</version>-->
-<!--                </dependency>-->
-                <dependency>
-                    <groupId>org.apache.openwebbeans</groupId>
-                    <artifactId>openwebbeans-impl</artifactId>
-                    <version>2.0.10</version>
-                </dependency>
+    <dependencyManagement>
+        <dependencies>
+            <!--                <dependency>-->
+            <!--                    <groupId>org.apache.xbean</groupId>-->
+            <!--                    <artifactId>xbean-asm6-shaded</artifactId>-->
+            <!--                    <version>4.8</version>-->
+            <!--                </dependency>-->
+            <dependency>
+                <groupId>org.apache.openwebbeans</groupId>
+                <artifactId>openwebbeans-impl</artifactId>
+                <version>2.0.10</version>
+            </dependency>
 
-                <dependency>
-                    <groupId>org.apache.openwebbeans</groupId>
-                    <artifactId>openwebbeans-spi</artifactId>
-                    <version>2.0.10</version>
-                </dependency>
+            <dependency>
+                <groupId>org.apache.openwebbeans</groupId>
+                <artifactId>openwebbeans-spi</artifactId>
+                <version>2.0.10</version>
+            </dependency>
 
-                <dependency>
-                    <groupId>org.apache.openwebbeans</groupId>
-                    <artifactId>openwebbeans-ejb</artifactId>
-                    <version>2.0.10</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.openwebbeans</groupId>
-                    <artifactId>openwebbeans-ee-common</artifactId>
-                    <version>2.0.10</version>
-                </dependency>
+            <dependency>
+                <groupId>org.apache.openwebbeans</groupId>
+                <artifactId>openwebbeans-ejb</artifactId>
+                <version>2.0.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.openwebbeans</groupId>
+                <artifactId>openwebbeans-ee-common</artifactId>
+                <version>2.0.10</version>
+            </dependency>
 
-                <dependency>
-                    <groupId>org.apache.openwebbeans</groupId>
-                    <artifactId>openwebbeans-ee</artifactId>
-                    <artifactId>openwebbeans-ee</artifactId>
-                    <version>2.0.10</version>
-                </dependency>
+            <dependency>
+                <groupId>org.apache.openwebbeans</groupId>
+                <artifactId>openwebbeans-ee</artifactId>
+                <version>2.0.10</version>
+            </dependency>
 
-                <dependency>
-                    <groupId>org.apache.openwebbeans</groupId>
-                    <artifactId>openwebbeans-web</artifactId>
-                    <version>2.0.10</version>
-                </dependency>
-            </dependencies>
-        </dependencyManagement>
+            <dependency>
+                <groupId>org.apache.openwebbeans</groupId>
+                <artifactId>openwebbeans-web</artifactId>
+                <version>2.0.10</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <profiles>
         <profile>
@@ -153,6 +152,49 @@
 
             </dependencies>
 
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.2.1</version>
+                        <configuration>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <transformers>
+                                        <transformer
+                                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                        <transformer
+                                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                            <manifestEntries>
+                                                <Main-Class>org.elcer.accounts.App</Main-Class>
+                                            </manifestEntries>
+                                        </transformer>
+                                    </transformers>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <profile>
@@ -170,11 +212,28 @@
                     <version>${tomee}</version>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <executions>
+                            <execution>
+                                <id>test</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>war</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
 
     </profiles>
-
 
     <dependencies>
 
@@ -301,7 +360,48 @@
     </dependencies>
 
     <build>
+        <finalName>app-${project.version}</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>src/main/resources/checkstyle.xml</configLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                        </configuration>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <argLine>
+                        --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
+                        --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+                <goals>
+                    <goal>test</goal>
+                </goals>
+                <version>3.0.0-M3</version>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -320,14 +420,38 @@
                                 </requireActiveProfile>
                                 <evaluateBeanshell>
                                     <condition><![CDATA[
-                                        // ensure PROFILE_ONE XOR PROFILE_TWO
-                                        print("Checking if only one of PROFILE_ONE and PROFILE_TWO profiles is active ...");
+                                        print("Checking if only one of derby and postgres profiles is active ...");
                                         boolean profile1 = false, profile2 = false;
                                         for(s: "${project.activeProfiles}".replaceAll("\\[?\\s?Profile \\{id: (?<profile>\\w+), source: \\w+\\}\\]?", "${profile}").split(",")) {
                                             if("derby".equalsIgnoreCase(s)){ profile1 = true;}
                                             if("postgres".equalsIgnoreCase(s)){ profile2 = true;}
                                         }
-                                        print("derby XOR postgres: "+(derby != postgres));
+                                        return profile1 != profile2;
+                                    ]]></condition>
+                                </evaluateBeanshell>
+                            </rules>
+                            <failFast>true</failFast>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>enforce-war-XOR-embedded-is-active</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireActiveProfile>
+                                    <profiles>war,embedded</profiles>
+                                    <all>false</all>
+                                </requireActiveProfile>
+                                <evaluateBeanshell>
+                                    <condition><![CDATA[
+                                        print("Checking if only one of war and embedded profiles is active ...");
+                                        boolean profile1 = false, profile2 = false;
+                                        for(s: "${project.activeProfiles}".replaceAll("\\[?\\s?Profile \\{id: (?<profile>\\w+), source: \\w+\\}\\]?", "${profile}").split(",")) {
+                                            if("war".equalsIgnoreCase(s)){ profile1 = true;}
+                                            if("embedded".equalsIgnoreCase(s)){ profile2 = true;}
+                                        }
                                         return profile1 != profile2;
                                     ]]></condition>
                                 </evaluateBeanshell>
@@ -343,49 +467,11 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
-                <configuration>
-                    <createDependencyReducedPom>true</createDependencyReducedPom>
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                </configuration>
 
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Main-Class>org.elcer.accounts.App</Main-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

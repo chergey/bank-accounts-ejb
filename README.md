@@ -1,7 +1,7 @@
 # Bank rest service
-Project featuring REST service <strong> without making use of Spring </strong>.
-The premise that rest application can be developed in the same manner as Spring.
-The app is kept as simple as possible, with only one method /account/transfer.
+Project featuring REST service using Java EE.
+The premise is that rest application can be developed in the same manner as Spring.
+The app is kept as simple as possible.
 
 Stack
 * [TomEE](http://tomee.apache.org/) Tomcat Enterprise Server
@@ -13,6 +13,14 @@ To run
 ```
 mvn package 
 java -jar <app-name> -port=<port>
-curl http://localhost:<port>/api/account/transfer?from=1&to=2&amount=10
 ```
 
+
+
+Sample requests
+```
+curl -X POST http://localhost:<port>/api/accounts/transfer?from=1&to=2&amount=10
+curl http://localhost:<port>/api/accounts
+curl http://localhost:<port>/api/accounts/somename?page=&size=20
+curl -X DELETE http://localhost:<port>/api/accounts/2
+```

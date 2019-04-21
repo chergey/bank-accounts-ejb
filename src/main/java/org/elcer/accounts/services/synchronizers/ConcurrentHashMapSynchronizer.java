@@ -3,6 +3,7 @@ package org.elcer.accounts.services.synchronizers;
 import org.elcer.accounts.services.CompareStrategy;
 import org.elcer.accounts.services.Synchronizer;
 
+import javax.enterprise.inject.Vetoed;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @see Synchronizer
  */
+@Vetoed
 public class ConcurrentHashMapSynchronizer implements Synchronizer<Long> {
 
     private static final Object DUMMY_OBJECT = new Object();

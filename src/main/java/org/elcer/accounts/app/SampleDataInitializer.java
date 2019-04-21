@@ -17,15 +17,16 @@ import java.math.BigDecimal;
 @Singleton
 public class SampleDataInitializer {
 
+    private static final int ACCOUNTS_TO_CREATE = 1000;
+
     @Inject
     private AccountRepository accountRepository;
 
     private boolean init;
 
-    private static final int ACCOUNTS_TO_CREATE = 1000;
 
     @PostConstruct
-    public void init() {
+    private void init() {
         if (init) return;
         try {
             for (int i = 1; i < ACCOUNTS_TO_CREATE; i++) {

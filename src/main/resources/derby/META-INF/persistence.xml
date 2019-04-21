@@ -12,6 +12,5 @@
             <property name="javax.persistence.jdbc.password" value="test"/>
             <property name="openjpa.jdbc.TransactionIsolation" value="serializable"/>
         </properties>
-
     </persistence-unit>
 </persistence>

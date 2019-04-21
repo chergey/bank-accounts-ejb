@@ -3,7 +3,6 @@ package org.elcer.accounts;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.openejb.testing.Application;
-import org.apache.openejb.testing.Classes;
 import org.apache.tomee.embedded.TomEEEmbeddedApplicationRunner;
 import org.elcer.accounts.exceptions.NotEnoughFundsException;
 import org.elcer.accounts.model.Account;
@@ -26,22 +25,18 @@ import java.math.RoundingMode;
 import java.util.Set;
 
 @Application
-@Classes(context = "app")
 @RunWith(RepeatableRunner.class)
 public class AppTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AppTest.class);
-
+    private static BeanManager savedBeanManager;
 
     @Inject
     private AccountService accountService;
 
-    private static AccountService accountServiceStatic;
-
     @Inject
     private BeanManager beanManager;
 
-    private static BeanManager beanManagerStatic;
 
     @Inject
     private AccountRepository accountRepository;
@@ -57,17 +52,15 @@ public class AppTest {
 
     @PostConstruct
     public void init() {
-        accountServiceStatic = accountService;
-        beanManagerStatic = beanManager;
-
+        savedBeanManager = beanManager;
     }
 
 
     @Test
     public void testConcurrencyAndDeadlocks() {
-        final int times = 14000;
+        final int times = 1400;
 
-        accountRepository = getBean(beanManagerStatic, AccountRepository.class);
+        accountRepository = getBean(AccountRepository.class);
 
         var first = accountRepository.createAccount(new Account("Mike", BigDecimal.valueOf(26000)));
         var second = accountRepository.createAccount(new Account("Jenny", BigDecimal.valueOf((315000))));
@@ -118,10 +111,13 @@ public class AppTest {
     }
 
     private void transfer(final int times, Account debit, Account credit) {
+
+        accountService = getBean(AccountService.class);
+
         int i = times;
         while (i-- >= 0) {
             try {
-                accountServiceStatic.transfer(debit.getId(), credit.getId(),
+                accountService.transfer(debit.getId(), credit.getId(),
                         BigDecimal.valueOf(RandomUtils.nextLong(10, 1000)));
             } catch (Exception e) {
                 if (e instanceof NotEnoughFundsException) {
@@ -134,17 +130,17 @@ public class AppTest {
     }
 
 
-
-
-    private static <T> T getBean(BeanManager beanManager, Class<T> clazz) {
-        Set<Bean<?>> beans = beanManager.getBeans(clazz);
+    private static <T> T getBean(Class<T> clazz) {
+        Set<Bean<?>> beans = savedBeanManager.getBeans(clazz);
         if (beans.size() != 1) {
             return null;
         }
 
         @SuppressWarnings("unchecked") Bean<T> bean = (Bean<T>) CollectionUtils.extractSingleton(beans);
-        CreationalContext<T> ctx = beanManager.createCreationalContext(bean);
-        @SuppressWarnings("unchecked") T object = (T) beanManager.getReference(bean, clazz, ctx);
+        CreationalContext<T> ctx = savedBeanManager.createCreationalContext(bean);
+        @SuppressWarnings("unchecked") T object = (T) savedBeanManager.getReference(bean, clazz, ctx);
+
+        Assert.assertNotNull("Can't be null", object);
         return object;
 
     }

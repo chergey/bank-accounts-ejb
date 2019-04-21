@@ -3,7 +3,6 @@ package org.elcer.accounts.services.synchronizers;
 import org.elcer.accounts.services.CompareStrategy;
 import org.elcer.accounts.services.Synchronizer;
 
-import javax.enterprise.inject.Vetoed;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -14,7 +13,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Default synchronization making use of ReentrantLockS
  * @see Synchronizer
  */
-@Vetoed
 public class ReentrantlockSynchronizer implements Synchronizer<Long> {
     private final Map<Long, Lock> slots = new ConcurrentHashMap<>();
 
@@ -25,7 +23,6 @@ public class ReentrantlockSynchronizer implements Synchronizer<Long> {
     public void withLock(final Long one, final Long second, Runnable action) {
         final Lock o1 = slots.computeIfAbsent(one, (k) -> new ReentrantLock()),
                 o2 = slots.computeIfAbsent(second, (k) -> new ReentrantLock());
-
 
         try {
             if (compareStrategy.compare(one, second)) {

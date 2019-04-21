@@ -6,20 +6,20 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import javax.ejb.Lock;
 import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Data
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @Accessors(chain = true)
 @Cacheable(false)
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // ApacheDB don't work well with IDENTITY (https://issues.apache.org/jira/browse/DERBY-5151)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // ApacheDB don't work well with IDENTITY (https://issues.apache.org/jira/browse/DERBY-5151)
     private long id;
 
     private String name;
@@ -37,10 +37,13 @@ public class Account {
         this.balance = balance;
     }
 
-    public Account(BigDecimal balance) {
-        this.balance = balance;
+
+    public void subtractBalance(BigDecimal balance) {
+        this.balance = this.balance.subtract(balance);
     }
 
-
+    public void increaseBalance(BigDecimal balance) {
+        this.balance = this.balance.add(balance);
+    }
 
 }
