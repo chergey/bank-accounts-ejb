@@ -3,6 +3,8 @@ Project featuring REST service using Java EE.
 The premise is that rest application can be developed in the same manner as Spring.
 The app is kept as simple as possible.
 
+[![Build Status](https://travis-ci.com/chergey/bank-accounts-ejb.svg?branch=master)](https://travis-ci.com/chergey/bank-accounts-ejb)
+
 Stack
 * [TomEE](http://tomee.apache.org/) Tomcat Enterprise Server
 * [OpenJPA](http://openjpa.apache.org/)
