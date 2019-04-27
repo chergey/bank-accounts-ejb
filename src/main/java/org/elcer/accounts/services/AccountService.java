@@ -59,7 +59,7 @@ public class AccountService {
     }
 
     public void createAccount(Account account) {
-        accountRepository.createAccount(account);
+        accountRepository.save(account);
 
     }
 
@@ -74,7 +74,8 @@ public class AccountService {
     }
 
     public void deleteAccount(long id) {
-        accountRepository.deleteAccount(id);
+        Account account = accountRepository.retrieveAccountById(id);
+        accountRepository.deleteAccount(account);
     }
 
     public List<Account> getAccounts(String name, int page, int size) {
@@ -86,13 +87,14 @@ public class AccountService {
     public Account replaceAccount(long id, Account account) {
         Account oldAccount = accountRepository.retrieveAccountById(id);
         if (oldAccount != null) {
-            accountRepository.deleteAccount(id);
-            account.setId(id);
-            return accountRepository.createAccount(account);
+            oldAccount.setBalance(account.getBalance());
+            oldAccount.setName(account.getName());
+            return accountRepository.save(oldAccount);
         } else {
             account.setId(id);
-            return accountRepository.createAccount(account);
+            return accountRepository.save(account);
         }
+
     }
 }
 

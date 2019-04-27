@@ -20,13 +20,17 @@ public class AccountRepository {
 
 
     @PersistenceContext(unitName = "accounts")
-   private EntityManager entityManager;
+    private EntityManager entityManager;
 
 
-    public Account createAccount(Account account) {
-        entityManager.persist(account);
-        return account;
+    public Account save(Account account) {
+        if (account.getId() == 0L) {
+            entityManager.persist(account);
+            return account;
+        }
+        return entityManager.merge(account);
     }
+
 
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     public List<Account> getAllAccounts(int page, int size) {
@@ -51,6 +55,10 @@ public class AccountRepository {
         }
         return account;
 
+    }
+
+    public void deleteAccount(Account account) {
+        entityManager.remove(entityManager.contains(account) ? account : entityManager.merge(account));
     }
 
 

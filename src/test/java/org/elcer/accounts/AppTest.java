@@ -62,10 +62,10 @@ public class AppTest {
 
         accountRepository = getBean(AccountRepository.class);
 
-        var first = accountRepository.createAccount(new Account("Mike", BigDecimal.valueOf(26000)));
-        var second = accountRepository.createAccount(new Account("Jenny", BigDecimal.valueOf((315000))));
-        var third = accountRepository.createAccount(new Account("David", BigDecimal.valueOf((313000))));
-        var fourth = accountRepository.createAccount(new Account("Steve", BigDecimal.valueOf(356000)));
+        var first = accountRepository.save(new Account("Mike", BigDecimal.valueOf(26000)));
+        var second = accountRepository.save(new Account("Jenny", BigDecimal.valueOf((315000))));
+        var third = accountRepository.save(new Account("David", BigDecimal.valueOf((313000))));
+        var fourth = accountRepository.save(new Account("Steve", BigDecimal.valueOf(356000)));
 
         var startingTotal = first.getBalance()
                 .add(second.getBalance())

@@ -33,7 +33,7 @@ public class SampleDataInitializer {
                 var account = new Account(RandomStringUtils.randomAlphabetic(5),
                         BigDecimal.valueOf(RandomUtils.nextLong(100, 10000)));
 
-                accountRepository.createAccount(account);
+                accountRepository.save(account);
             }
         } finally {
             init = true;
